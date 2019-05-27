@@ -1,10 +1,5 @@
-const user = {
-    username: "david.torroija@knowbly.com",
-    pwd: "Open$123"
-};
-
 const puppeteer = require("puppeteer");
-
+// const Canvas2Image = require("canvas2image");
 (async () => {
     const browser = await puppeteer.launch({
         headless: false
@@ -15,64 +10,48 @@ const puppeteer = require("puppeteer");
         height: 768
     });
     await page.goto(
-        "http://learn.knowblyhost.local:8080/cc/preview/5ce37346bd635f00828f2bdc/5ce37345bd635f00828f2bdb"
+        "https://www.w3schools.com/css/css_float.asp", {waitUntil: 'networkidle2'}
     );
-    await page.waitForSelector("div.view input[type=text]");
-    await page.click("input[type=text]");
-    await page.type("input[type=text]", user.username);
-    await page.click("input[type=password]");
-    await page.type("input[type=password]", user.pwd);
-    await page.waitForSelector(".kds-land");
-
-    await page.click("button");
-    await page.screenshot({
-        path: `./screenshots/screenshot-${Date.now()}-.png`
-    });
-
-    await page.waitForSelector(".kcp-course-content");
-    await page.waitForSelector(".kds-overlay-loader", {
-        hidden: true
-    });
-    await page.waitFor(2 * 1000);
-
+    await page.waitForSelector(".w3-main");
+    await page.addScriptTag({url: 'https://html2canvas.hertzen.com/dist/html2canvas.min.js'});
+    await page.addScriptTag({url: 'https://cdn.jsdelivr.net/npm/canvas2image@1.0.5/canvas2image.min.js'});
+    await page.addScriptTag({url: 'https://code.jquery.com/jquery-3.2.1.min.js'})
+    await page.waitFor(3000)
     const screenshot = await page.evaluate(async () => {
-        //block-5ce37344bd635f00828f2bd7
-        const block = {
-            id: "5ce37344bd635f00828f2bd7"
-        };
-        const canvasElement = await html2canvas($(`#block-${block.id}`)[0], {
+        console.log("html2canvas", html2canvas)
+        const canvasElement = await html2canvas($(".w3-clear.w3-border.w3-padding")[0], {
             windowWidth: 1100,
             // windowHeight: 300,
             // allowTaint: false,
             // logging: false,
             useCORS: true,
             // scale,
-            onclone: element => {
-                console.log("!!", $(element).height());
-                $(element)
-                    .find(".is-select")
-                    .removeClass("is-select kds-card--dotted");
-            }
+            // onclone: element => {
+            //     //example of removing something after clone to clean the image before take the screenshot
+            //     const className = "w3-border"
+            //     if (element.classList)
+            //         element.classList.remove(className);
+            //     else
+            //         element.className = element.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+            // }
         });
 
         let image = Canvas2Image.convertToImage(
             canvasElement,
-            $(canvasElement).width(),
-            $(canvasElement).height(),
+            canvasElement.clientHeight,
+            canvasElement.clientWidth,
             "png"
         );
+        console.log(image.src)
         return image.src;
-        //     return image;
-        //     // Open the data string in the current window
-        //     // document.location.href = imageData.replace(imageType, 'image/octet-stream');
-        // });
     })
+    await page.waitFor(30000)
+
     // console.log("hola", screenshot);
     var fs = require('fs');
     // strip off the data: url prefix to get just the base64-encoded bytes
     var data = screenshot.replace(/^data:image\/\w+;base64,/, "");
     var buf = new Buffer(data, 'base64');
-    fs.writeFile(`./screenshots/block-${Date.now()}-.png`, buf);
-    await page.waitFor(60 * 1000);
+    fs.writeFile(`./screenshots/div-${Date.now()}-.png`, buf);
     await browser.close();
 })();
