@@ -4,8 +4,6 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "express": "^4.17.1",
-    "html2canvas-proxy": "^1.0.1",
     "puppeteer": "^1.16.0"
   },
   "devDependencies": {},
